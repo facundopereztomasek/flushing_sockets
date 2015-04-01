@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		#salida{
+			width:500px;
+			height:500px;
+			margin:30px auto;
+			display: block;
+			font-family: monospace;
+			font-size:14px;
+			color:#444;
+		}
+		#data{
+			width:500px;
+			height:200px;
+			margin:30px auto 0;
+			display: block;
+			font-family: monospace;
+			font-size:14px;
+			color:#444;
+		}
+
+		p{
+			width:500px;
+			margin:0 auto;
+			display: block;
+			font-family: monospace;
+			font-size:14px;
+			color:#444;
+		}
+
+		.panel{
+			position:absolute;
+			left:0;
+			top:0;
+			margin:20px;
+		}
+	</style>
+	<script src="stringview.js"></script>
+</head>
+<body>
+	<textarea name="" id="salida" cols="30" rows="10"></textarea>
+	<p>Envio</p>
+	<textarea name="" id="data" cols="30" rows="10"></textarea>
+	<div class="panel"></div>
+	<script>
+	var textoConsola = '';
+
+	var lights = [];
+	for( var l = 0 ; l < 50*8 ; l++ ){
+		// if( (l+8) % 8 )
+		// 	lights[l] = '1';
+		// else
+		// 	lights[l] = '0';
+
+		// lights[l] = 1;
+
+		lights[l] = (l%6 == 0) ? 1:0;
+		// lights[l] = 0;
+	}
+
+	var vector;
+	var vectorHEX;
+	var vectorASCII;
+	var dataBinary;
+	var dataHEX;
+	var dataASCII;
+
+	var bufView = new Uint8Array(400);
+
+
+	var panel = document.querySelector('.panel');
+	var inputLight;
+	for( var l = 0 ; l < 50*8 ; l++ ){
+		inputLight = document.createElement('input');
+		inputLight.type = 'checkbox';
+		inputLight.name = 'inputLight_' + l  ;
+		inputLight.dataset.light =  l  ;
+		inputLight.onclick = function(){
+			if(lights[ this.dataset.light ] == '0') {
+				lights[ this.dataset.light ] = '1';
+				
+			}else{
+				lights[ this.dataset.light ] = '0';
+
+			}
+			calculate();
+
+		}
+		panel.appendChild(inputLight);
+		if( (l+1) % 32 == 0){
+			panel.appendChild(document.createElement('br'));
+		}
+	}
+	calculate();
+	function calculate(){
+		vector;
+		vectorHEX = 0x00;
+		vectorASCII = 0x00;
+		dataBinary = '';
+		dataHEX = '';
+		dataASCII = '';
+		textoConsola = '';
+		encodeLights();
+		console_log('Data HEX: ' + dataHEX);
+		document.getElementById('salida').value = textoConsola;
+
+		textoConsola = '';
+		
+		// console_log(dataASCII);
+		// console_log(String.fromCharCode.apply(null, bufView));
+		console_log(dataASCII);
+
+		document.getElementById('data').value = textoConsola;
+		
+	}
+
+
+
+	function zeros( n ){
+		var z = '';
+
+		for( var i = 0 ; i < n ; i++ ){
+			z += '0'
+		}
+		return z;
+	}
+
+	function toHex( n ){
+		n = n.toString(16).toUpperCase()
+		if( n.length == 1 ){
+			return '0' + n;
+		}
+		return n;
+	}
+
+	function console_log( texto ){
+		// console.log(texto);
+		textoConsola += texto + '\n';
+	}
+
+	function encodeLights(){
+		nbuff=0;
+		for( var l = 0 ; l < 50*8 ; l++ ){
+			console_log('********** DATA ' + l / 8  + ' (' + l / 8 * 8 + ' - ' + (l +7) + ') **********')
+			vector = 0;
+			vectorString = '';
+			vectorBit = '';
+			for( var b = 0 ; b < 8 ; b++ ){
+
+				vectorString = lights[ l + b ] + vectorString;
+				z = b ;
+				vectorBit = zeros(7-z) + lights[ l + b ] + zeros(z);
+				console_log( 'Luz ' + ( l + b ) + ': ' + lights[ l + b ] )
+			}
+			vector = parseInt( vectorString , 2 );
+			bufView[nbuff] = vector;
+			
+			nbuff++;
+
+			vectorHEX = toHex( vector );
+			vectorASCII = String.fromCharCode(parseInt(vectorString,2))//String.fromCharCode(vector);
+
+			dataBinary += vectorString;
+			// dataASCII += vectorASCII;
+			// dataASCII = new StringView(bufView); es una alternativa a la linea de arriba, mas solida.
+			dataHEX += vectorHEX;
+			console_log( 'Binary:    ' + vectorString );
+			console_log( 'Decimal:   ' + vector );
+			console_log( 'Hexa:      0x' + vectorHEX );
+			console_log( 'ASCII:     ' + vectorASCII );
+			console_log('-------------------------------------');
+			l+=7;
+		}
+		dataASCII = new StringView(bufView);
+		// dataASCII = new StringView(bufView);
+		// console.log(bufView);
+
+	}
+
+
+	</script>
+</body>
+</html>
