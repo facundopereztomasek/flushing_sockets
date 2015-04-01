@@ -1,0 +1,12 @@
+<h1>Screen</h1>
+<img src="" alt="" class="imagen" width=300>
+<script src="https://cdn.socket.io/socket.io-1.3.4.js"></script>
+<script>
+    var socket = io.connect('//192.168.10.104:8000');
+    var imagen = document.querySelector('.imagen');
+    socket.on('loadImage',function(data){
+    	imagen.src = 'images/' + data.file + '.jpg';
+    });
+
+    socket.emit('screen' , null);
+</script>
